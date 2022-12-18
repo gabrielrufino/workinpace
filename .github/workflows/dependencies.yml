@@ -47,7 +47,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
-            if [ ! $(which docker) ]
+            if [ ! $(which git) ]
             then
               apt update
               apt install git -y
