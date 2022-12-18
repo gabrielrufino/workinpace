@@ -1,4 +1,4 @@
-name: Setup
+name: Dependencies
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Setup docker using SSH
+      - name: Install docker using SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SERVER_SSH_HOST }}
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Setup docker using SSH
+      - name: Install git using SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SERVER_SSH_HOST }}
