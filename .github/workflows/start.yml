@@ -1,9 +1,9 @@
-name: Setup
+name: Start
 
 on:
   workflow_run:
     workflows:
-      - Dependencies
+      - Setup
     types:
       - completed
 
@@ -20,11 +20,5 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
-            DOCKER_COMPOSE_FOLDER=$HOME/docker-compose.yml
-            if [ ! -d $DOCKER_COMPOSE_FOLDER ]
-            then
-              git clone https://github.com/gabrielrufino/docker-compose.yml.git $DOCKER_COMPOSE_FOLDER
-            else
-              cd $DOCKER_COMPOSE_FOLDER
-              git pull
-            fi
+            cd $HOME/docker-compose.yml
+            docker compose up vscode -d
