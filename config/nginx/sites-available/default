@@ -1,0 +1,17 @@
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;
+
+  server_name _;
+
+  location /pgadmin/ {
+    proxy_pass http://0.0.0.0:16543/;
+    proxy_set_header X-Script-Name /pgadmin;
+  }
+
+  location / {
+    proxy_pass http://0.0.0.0:3003;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection upgrade;
+  }
+}
