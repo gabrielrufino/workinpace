@@ -55,6 +55,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           rm: true
+          override: true
           source: config/nginx/sites-available/default
           target: /etc/nginx/sites-available
       - name: Start and enable nginx service
