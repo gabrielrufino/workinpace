@@ -28,6 +28,21 @@ jobs:
               cd $DOCKER_COMPOSE_FOLDER
               git pull
             fi
+  firewall:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup firewall using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_SSH_HOST }}
+          username: ${{ secrets.SERVER_SSH_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            ufw allow 'Nginx HTTP'
+            ufw allow 'Nginx HTTPS'
+            ufw enable
   nginx:
     runs-on: ubuntu-latest
 
