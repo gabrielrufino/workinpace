@@ -6,6 +6,7 @@ on:
       - Setup
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
   vscode:
