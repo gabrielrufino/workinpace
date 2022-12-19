@@ -1,14 +1,17 @@
 server {
-	listen 80 default_server;
-	listen [::]:80 default_server;
+  listen 80 default_server;
+  listen [::]:80 default_server;
 
-	root /var/www/html;
+  server_name _;
 
-	index index.html index.htm index.nginx-debian.html;
+  location /pgadmin/ {
+    proxy_pass http://0.0.0.0:16543/;
+    proxy_set_header X-Script-Name /pgadmin;
+  }
 
-	server_name _;
-
-	location / {
-		try_files $uri $uri/ =404;
-	}
+  location / {
+    proxy_pass http://0.0.0.0:3003;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection upgrade;
+  }
 }
