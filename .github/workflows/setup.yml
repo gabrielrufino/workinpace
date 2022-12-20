@@ -40,6 +40,8 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
+            ufw deny 3003
+            ufw deny 16543
             ufw allow 'Nginx HTTP'
             ufw allow 'Nginx HTTPS'
             ufw enable
