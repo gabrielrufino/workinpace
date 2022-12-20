@@ -7,6 +7,13 @@ on:
     types:
       - completed
   workflow_dispatch:
+    inputs:
+      vscode:
+        type: boolean
+        default: true
+      pgadmin:
+        type: boolean
+        default: false
 
 jobs:
   vscode:
@@ -14,6 +21,7 @@ jobs:
 
     steps:
       - name: Start vscode using SSH
+        if: ${{ github.event.inputs.vscode }}
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SERVER_SSH_HOST }}
@@ -28,6 +36,7 @@ jobs:
 
     steps:
       - name: Start pgadmin using SSH
+        if: ${{ github.event.inputs.pgadmin }}
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SERVER_SSH_HOST }}
