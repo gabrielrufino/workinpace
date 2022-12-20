@@ -57,6 +57,6 @@ jobs:
           script: |
             htpasswd -b -c /etc/nginx/.htpasswd root root
             cd /etc/nginx/sites-available
-            wget https://raw.githubusercontent.com/${GITHUB_ACTION_REPOSITORY}/${GITHUB_BASE_REF}/config/nginx/sites-available/default -O default
+            wget https://raw.githubusercontent.com/gabrielrufino/workspeace/main/config/nginx/sites-available/default -O default
             systemctl restart nginx
             systemctl enable nginx
