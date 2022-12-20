@@ -10,8 +10,10 @@ server {
   }
 
   location / {
-    proxy_pass http://0.0.0.0:3003;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection upgrade;
+    proxy_pass           http://0.0.0.0:3003;
+    proxy_set_header     Upgrade $http_upgrade;
+    proxy_set_header     Connection upgrade;
+    auth_basic           "VSCode Access";
+    auth_basic_user_file /etc/nginx/.htpasswd; 
   }
 }
