@@ -1,27 +1,31 @@
-name: Start
+name: Update
 
 on:
-  workflow_run:
-    workflows:
-      - Setup
-    types:
-      - completed
+  schedule:
+    - cron: '0 0 * * *'
   workflow_dispatch:
-    inputs:
-      vscode:
-        type: boolean
-        default: true
-      pgadmin:
-        type: boolean
-        default: false
 
 jobs:
+  server:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Update server using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_SSH_HOST }}
+          username: ${{ secrets.SERVER_SSH_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            sudo apt update
+            sudo apt upgrade -y
+            sudo apt autoremove -y
   vscode:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Start vscode using SSH
-        if: ${{ github.event.inputs.vscode }}
+      - name: Update vscode container using SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SERVER_SSH_HOST }}
@@ -30,19 +34,6 @@ jobs:
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
             cd $HOME/docker-compose.yml
-            docker compose up vscode -d
-  pgadmin:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Start pgadmin using SSH
-        if: ${{ github.event.inputs.pgadmin }}
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
-          script: |
-            cd $HOME/docker-compose.yml
-            docker compose up pgadmin -d
+            docker compose exec vscode sudo apt update
+            docker compose exec vscode sudo apt upgrade -y 
+            docker compose exec vscode sudo apt autoremove -y
