@@ -67,4 +67,4 @@ jobs:
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
             cd $HOME/docker-compose.yml
-            docker compose stop pgadmin -d
+            docker compose stop pgadmin
