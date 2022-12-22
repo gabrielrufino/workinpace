@@ -8,11 +8,11 @@ on:
       - completed
 
 jobs:
-  docker-compose:
+  compose:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Clone docker-compose using SSH
+      - name: Clone compose using SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SERVER_SSH_HOST }}
