@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Start vscode using SSH
+      - name: Starts vscode using SSH
         if: ${{ github.event.inputs.vscode }}
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Start pgadmin using SSH
+      - name: Starts pgadmin using SSH
         if: ${{ github.event.inputs.pgadmin }}
         uses: appleboy/ssh-action@v0.1.6
         with:
