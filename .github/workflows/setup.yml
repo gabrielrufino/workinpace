@@ -63,4 +63,5 @@ jobs:
           script: |
             # htpasswd -b -c /etc/nginx/.htpasswd root root
             cd $HOME/docker-compose.yml
+            cat "TRAEFIK_BASE_HOST=workspeace.gabrielrufino.com" >> .env
             docker compose up traefik -d
