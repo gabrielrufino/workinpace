@@ -45,8 +45,8 @@ jobs:
             ufw deny 3003
             ufw deny 16543
             ufw allow 22
-            ufw allow 'Nginx HTTP'
-            ufw allow 'Nginx HTTPS'
+            ufw allow 80
+            ufw allow 443
             ufw enable
   traefik:
     runs-on: ubuntu-latest
