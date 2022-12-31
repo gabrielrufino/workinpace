@@ -23,13 +23,20 @@ jobs:
       - name: Starts vscode using SSH
         if: ${{ github.event.inputs.vscode }}
         uses: appleboy/ssh-action@v0.1.6
+        env:
+          VSCODE_USERNAME: ${{ secrets.VSCODE_USERNAME || 'admin' }}
+          VSCODE_PASSWORD: ${{ secrets.VSCODE_PASSWORD || 'admin' }}
         with:
           host: ${{ secrets.SERVER_SSH_HOST }}
           username: ${{ secrets.SERVER_SSH_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
+          envs: VSCODE_USERNAME,VSCODE_PASSWORD
           script: |
             cd $HOME/docker-compose.yml
+            ENCRYPTED_VSCODE_PASSWORD=$(htpasswd -nbs $VSCODE_USERNAME $VSCODE_PASSWORD | cut -d ':' -f 2)
+            echo "VSCODE_TRAEFIK_USERNAME=$VSCODE_USERNAME" >> .env
+            echo "VSCODE_TRAEFIK_PASSWORD=\"$ENCRYPTED_VSCODE_PASSWORD\"" >> .env
             docker compose up vscode -d
       - name: Stops vscode using SSH
         if: ${{ !github.event.inputs.vscode }}
