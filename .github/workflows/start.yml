@@ -150,6 +150,7 @@ jobs:
   vscode:
     runs-on: ubuntu-latest
     needs:
+      - htpasswd
       - traefik
     steps:
       - name: Starts vscode using SSH
