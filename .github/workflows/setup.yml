@@ -25,11 +25,11 @@ jobs:
             then
               git clone https://github.com/gabrielrufino/docker-compose.yml.git $DOCKER_COMPOSE_FOLDER
               cd $DOCKER_COMPOSE_FOLDER
-              cp .env.default .env
             else
               cd $DOCKER_COMPOSE_FOLDER
               git pull
             fi
+            cp .env.default .env
   firewall:
     runs-on: ubuntu-latest
 
