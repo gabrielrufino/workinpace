@@ -12,6 +12,7 @@ on:
 
 jobs:
   htpasswd:
+    name: Install htpasswd
     runs-on: ubuntu-latest
     steps:
       - name: Install htpasswd using SSH
@@ -28,6 +29,7 @@ jobs:
               apt install apache2-utils -y
             fi
   docker:
+    name: Install docker
     runs-on: ubuntu-latest
     steps:
       - name: Install docker using SSH
@@ -56,6 +58,7 @@ jobs:
               apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
             fi
   git:
+    name: Install git
     runs-on: ubuntu-latest
     steps:
       - name: Install git using SSH
@@ -72,6 +75,7 @@ jobs:
               apt install git -y
             fi
   ufw:
+    name: Install ufw
     runs-on: ubuntu-latest
     steps:
       - name: Install ufw using SSH
@@ -88,6 +92,7 @@ jobs:
               apt install ufw -y
             fi
   compose:
+    name: Setup compose
     runs-on: ubuntu-latest
     needs:
       - git
@@ -111,6 +116,7 @@ jobs:
             fi
             cp .env.default .env
   firewall:
+    name: Setup firewall
     runs-on: ubuntu-latest
     needs:
       - ufw
@@ -130,6 +136,7 @@ jobs:
             ufw allow 443
             ufw enable
   traefik:
+    name: Starts traefik
     runs-on: ubuntu-latest
     needs:
       - docker
@@ -148,6 +155,7 @@ jobs:
             echo "TRAEFIK_BASE_HOST=workspeace.gabrielrufino.com" >> .env
             docker compose up traefik -d
   vscode:
+    name: VSCode
     runs-on: ubuntu-latest
     needs:
       - htpasswd
@@ -183,6 +191,7 @@ jobs:
             cd $HOME/docker-compose.yml
             docker compose stop vscode
   pgadmin:
+    name: pgAdmin
     runs-on: ubuntu-latest
     needs:
       - traefik
