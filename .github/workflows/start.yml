@@ -1,11 +1,6 @@
 name: Start
 
 on:
-  workflow_run:
-    workflows:
-      - Setup
-    types:
-      - completed
   workflow_dispatch:
     inputs:
       vscode:
@@ -16,9 +11,146 @@ on:
         default: false
 
 jobs:
+  htpasswd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install htpasswd using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_SSH_HOST }}
+          username: ${{ secrets.SERVER_SSH_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            if [ ! $(which htpasswd) ]
+            then
+              apt update
+              apt install apache2-utils -y
+            fi
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install docker using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_SSH_HOST }}
+          username: ${{ secrets.SERVER_SSH_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            if [ ! $(which docker) ]
+            then
+              apt remove docker docker-engine docker.io containerd runc -y
+              apt update
+              apt install \
+                ca-certificates \
+                curl \
+                gnupg \
+                lsb-release -y
+              mkdir -p /etc/apt/keyrings
+              curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+              echo \
+                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+                $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+              apt update
+              apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
+            fi
+  git:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install git using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_SSH_HOST }}
+          username: ${{ secrets.SERVER_SSH_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            if [ ! $(which git) ]
+            then
+              apt update
+              apt install git -y
+            fi
+  ufw:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install ufw using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_SSH_HOST }}
+          username: ${{ secrets.SERVER_SSH_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            if [ ! $(which ufw) ]
+            then
+              apt update
+              apt install ufw -y
+            fi
+  compose:
+    runs-on: ubuntu-latest
+    needs:
+      - git
+    steps:
+      - name: Clone compose using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_SSH_HOST }}
+          username: ${{ secrets.SERVER_SSH_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            DOCKER_COMPOSE_FOLDER=$HOME/docker-compose.yml
+            if [ ! -d $DOCKER_COMPOSE_FOLDER ]
+            then
+              git clone https://github.com/gabrielrufino/docker-compose.yml.git $DOCKER_COMPOSE_FOLDER
+              cd $DOCKER_COMPOSE_FOLDER
+            else
+              cd $DOCKER_COMPOSE_FOLDER
+              git pull
+            fi
+            cp .env.default .env
+  firewall:
+    runs-on: ubuntu-latest
+    needs:
+      - ufw
+    steps:
+      - name: Setup firewall using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_SSH_HOST }}
+          username: ${{ secrets.SERVER_SSH_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            ufw deny 3003
+            ufw deny 16543
+            ufw allow 22
+            ufw allow 80
+            ufw allow 443
+            ufw enable
+  traefik:
+    runs-on: ubuntu-latest
+    needs:
+      - docker
+      - compose
+      - firewall
+    steps:
+      - name: Setup traefik
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_SSH_HOST }}
+          username: ${{ secrets.SERVER_SSH_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            cd $HOME/docker-compose.yml
+            echo "TRAEFIK_BASE_HOST=workspeace.gabrielrufino.com" >> .env
+            docker compose up traefik -d
   vscode:
     runs-on: ubuntu-latest
-
+    needs:
+      - traefik
     steps:
       - name: Starts vscode using SSH
         if: ${{ github.event.inputs.vscode }}
@@ -51,7 +183,8 @@ jobs:
             docker compose stop vscode
   pgadmin:
     runs-on: ubuntu-latest
-
+    needs:
+      - traefik
     steps:
       - name: Starts pgadmin using SSH
         if: ${{ github.event.inputs.pgadmin }}
