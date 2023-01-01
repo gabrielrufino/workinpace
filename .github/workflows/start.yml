@@ -29,7 +29,7 @@ jobs:
       - name: Install htpasswd using SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: "$SERVER_SSH_HOST"
+          host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ secrets.SERVER_SSH_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
