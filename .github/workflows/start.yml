@@ -178,6 +178,7 @@ jobs:
             cd $HOME/docker-compose.yml
             echo "TRAEFIK_BASE_HOST=$DOMAIN" >> .env
             echo "TRAEFIK_ACME_EMAIL=$ACME_EMAIL" >> .env
+            echo "TRAEFIK_RESTART_POLICY=always" >> .env
             docker compose up traefik -d
   vscode:
     name: VSCode
