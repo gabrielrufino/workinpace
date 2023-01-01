@@ -14,9 +14,16 @@ env:
   SERVER_SSH_HOST: ${{ secrets.SERVER_SSH_HOST }}
 
 jobs:
+  validation:
+    name: Validates variables
+    steps:
+      - if: ${{ env.SERVER_SSH_HOST == '' }}
+        run: exit 1
   htpasswd:
     name: Install htpasswd
     runs-on: ubuntu-latest
+    needs:
+      - validation
     steps:
       - name: Install htpasswd using SSH
         uses: appleboy/ssh-action@v0.1.6
@@ -34,6 +41,8 @@ jobs:
   docker:
     name: Install docker
     runs-on: ubuntu-latest
+    needs:
+      - validation
     steps:
       - name: Install docker using SSH
         uses: appleboy/ssh-action@v0.1.6
@@ -63,6 +72,8 @@ jobs:
   git:
     name: Install git
     runs-on: ubuntu-latest
+    needs:
+      - validation
     steps:
       - name: Install git using SSH
         uses: appleboy/ssh-action@v0.1.6
@@ -80,6 +91,8 @@ jobs:
   ufw:
     name: Install ufw
     runs-on: ubuntu-latest
+    needs:
+      - validation
     steps:
       - name: Install ufw using SSH
         uses: appleboy/ssh-action@v0.1.6
