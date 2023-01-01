@@ -16,6 +16,7 @@ env:
 jobs:
   validation:
     name: Validates variables
+    runs-on: ubuntu-latest
     steps:
       - if: ${{ env.SERVER_SSH_HOST == '' }}
         run: exit 1
