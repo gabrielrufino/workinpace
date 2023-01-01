@@ -196,6 +196,7 @@ jobs:
           username: ${{ env.SERVER_SSH_USER }}
           key: ${{ env.SERVER_SSH_KEY }}
           port: ${{ env.SERVER_SSH_PORT }}
+          envs: VSCODE_USERNAME,VSCODE_PASSWORD
           script: |
             cd $HOME/docker-compose.yml
             ENCRYPTED_VSCODE_PASSWORD=$(htpasswd -nbs $VSCODE_USERNAME $VSCODE_PASSWORD | cut -d ':' -f 2)
