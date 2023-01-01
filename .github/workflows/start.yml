@@ -10,6 +10,9 @@ on:
         type: boolean
         default: false
 
+env:
+  SERVER_SSH_HOST: ${{ secrets.SERVER_SSH_HOST }}
+
 jobs:
   htpasswd:
     name: Install htpasswd
@@ -18,7 +21,7 @@ jobs:
       - name: Install htpasswd using SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
+          host: $SERVER_SSH_HOST
           username: ${{ secrets.SERVER_SSH_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
@@ -143,6 +146,7 @@ jobs:
       - compose
       - firewall
     env:
+      DOMAIN: ${{ secrets.DOMAIN }}
       ACME_EMAIL: ${{ secrets.ACME_EMAIL }}
     steps:
       - name: Setup traefik
@@ -154,7 +158,7 @@ jobs:
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
             cd $HOME/docker-compose.yml
-            echo "TRAEFIK_BASE_HOST=workspeace.gabrielrufino.com" >> .env
+            echo "TRAEFIK_BASE_HOST=$DOMAIN" >> .env
             echo "TRAEFIK_ACME_EMAIL=$ACME_EMAIL" >> .env
             docker compose up traefik -d
   vscode:
