@@ -164,9 +164,6 @@ jobs:
       - docker
       - compose
       - firewall
-    env:
-      DOMAIN: ${{ secrets.DOMAIN }}
-      ACME_EMAIL: ${{ secrets.ACME_EMAIL }}
     steps:
       - name: Setup traefik
         uses: appleboy/ssh-action@v0.1.6
@@ -175,6 +172,7 @@ jobs:
           username: ${{ env.SERVER_SSH_USER }}
           key: ${{ env.SERVER_SSH_KEY }}
           port: ${{ env.SERVER_SSH_PORT }}
+          envs: DOMAIN,ACME_EMAIL
           script: |
             cd $HOME/docker-compose.yml
             echo "TRAEFIK_BASE_HOST=$DOMAIN" >> .env
