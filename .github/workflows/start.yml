@@ -1,11 +1,6 @@
 name: Start
 
 on:
-  workflow_run:
-    workflows:
-      - Setup
-    types:
-      - completed
   workflow_dispatch:
     inputs:
       vscode:
@@ -15,45 +10,224 @@ on:
         type: boolean
         default: false
 
-jobs:
-  vscode:
-    runs-on: ubuntu-latest
+env:
+  SERVER_SSH_HOST: ${{ secrets.SERVER_SSH_HOST }}
+  SERVER_SSH_USER: ${{ secrets.SERVER_SSH_USER }}
+  SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+  SERVER_SSH_PORT: ${{ secrets.SERVER_SSH_PORT }}
+  DOMAIN: ${{ secrets.DOMAIN }}
+  ACME_EMAIL: ${{ secrets.ACME_EMAIL }}
 
+jobs:
+  validation:
+    name: Validates variables
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ env.SERVER_SSH_HOST == '' || env.SERVER_SSH_USER == '' || env.SERVER_SSH_KEY == '' || env.SERVER_SSH_PORT == '' || env.DOMAIN == '' || env.ACME_EMAIL == '' }}
+        run: exit 1
+  htpasswd:
+    name: Install htpasswd
+    runs-on: ubuntu-latest
+    needs:
+      - validation
+    steps:
+      - name: Install htpasswd using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          script: |
+            if [ ! $(which htpasswd) ]
+            then
+              apt update
+              apt install apache2-utils -y
+            fi
+  docker:
+    name: Install docker
+    runs-on: ubuntu-latest
+    needs:
+      - validation
+    steps:
+      - name: Install docker using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          script: |
+            if [ ! $(which docker) ]
+            then
+              apt remove docker docker-engine docker.io containerd runc -y
+              apt update
+              apt install \
+                ca-certificates \
+                curl \
+                gnupg \
+                lsb-release -y
+              mkdir -p /etc/apt/keyrings
+              curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+              echo \
+                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+                $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+              apt update
+              apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
+            fi
+  git:
+    name: Install git
+    runs-on: ubuntu-latest
+    needs:
+      - validation
+    steps:
+      - name: Install git using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          script: |
+            if [ ! $(which git) ]
+            then
+              apt update
+              apt install git -y
+            fi
+  ufw:
+    name: Install ufw
+    runs-on: ubuntu-latest
+    needs:
+      - validation
+    steps:
+      - name: Install ufw using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          script: |
+            if [ ! $(which ufw) ]
+            then
+              apt update
+              apt install ufw -y
+            fi
+  compose:
+    name: Setup compose
+    runs-on: ubuntu-latest
+    needs:
+      - git
+    steps:
+      - name: Clone compose using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          script: |
+            DOCKER_COMPOSE_FOLDER=$HOME/docker-compose.yml
+            if [ ! -d $DOCKER_COMPOSE_FOLDER ]
+            then
+              git clone https://github.com/gabrielrufino/docker-compose.yml.git $DOCKER_COMPOSE_FOLDER
+              cd $DOCKER_COMPOSE_FOLDER
+            else
+              cd $DOCKER_COMPOSE_FOLDER
+              git pull
+            fi
+            cp .env.default .env
+  firewall:
+    name: Setup firewall
+    runs-on: ubuntu-latest
+    needs:
+      - ufw
+    steps:
+      - name: Setup firewall using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          script: |
+            ufw deny 3003
+            ufw deny 16543
+            ufw allow 22
+            ufw allow 80
+            ufw allow 443
+            ufw enable
+  traefik:
+    name: Starts traefik
+    runs-on: ubuntu-latest
+    needs:
+      - docker
+      - compose
+      - firewall
+    steps:
+      - name: Setup traefik
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          envs: DOMAIN,ACME_EMAIL
+          script: |
+            cd $HOME/docker-compose.yml
+            echo "TRAEFIK_BASE_HOST=$DOMAIN" >> .env
+            echo "TRAEFIK_ACME_EMAIL=$ACME_EMAIL" >> .env
+            docker compose up traefik -d
+  vscode:
+    name: VSCode
+    runs-on: ubuntu-latest
+    needs:
+      - htpasswd
+      - traefik
     steps:
       - name: Starts vscode using SSH
         if: ${{ github.event.inputs.vscode }}
         uses: appleboy/ssh-action@v0.1.6
+        env:
+          VSCODE_USERNAME: ${{ secrets.VSCODE_USERNAME || 'admin' }}
+          VSCODE_PASSWORD: ${{ secrets.VSCODE_PASSWORD || 'admin' }}
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          envs: VSCODE_USERNAME,VSCODE_PASSWORD
           script: |
             cd $HOME/docker-compose.yml
+            ENCRYPTED_VSCODE_PASSWORD=$(htpasswd -nbs $VSCODE_USERNAME $VSCODE_PASSWORD | cut -d ':' -f 2)
+            echo "VSCODE_TRAEFIK_USERNAME=$VSCODE_USERNAME" >> .env
+            echo "VSCODE_TRAEFIK_PASSWORD=\"$ENCRYPTED_VSCODE_PASSWORD\"" >> .env
             docker compose up vscode -d
       - name: Stops vscode using SSH
         if: ${{ !github.event.inputs.vscode }}
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             cd $HOME/docker-compose.yml
             docker compose stop vscode
   pgadmin:
+    name: pgAdmin
     runs-on: ubuntu-latest
-
+    needs:
+      - traefik
     steps:
       - name: Starts pgadmin using SSH
         if: ${{ github.event.inputs.pgadmin }}
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             cd $HOME/docker-compose.yml
             docker compose up pgadmin -d
@@ -61,10 +235,10 @@ jobs:
         if: ${{ !github.event.inputs.pgadmin }}
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             cd $HOME/docker-compose.yml
             docker compose stop pgadmin
