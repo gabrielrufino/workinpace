@@ -206,6 +206,7 @@ jobs:
               ENCRYPTED_VSCODE_PASSWORD=$(htpasswd -nbs $VSCODE_USERNAME $VSCODE_PASSWORD | cut -d ':' -f 2)
               echo "VSCODE_TRAEFIK_USERNAME=$VSCODE_USERNAME" >> .env
               echo "VSCODE_TRAEFIK_PASSWORD=\"$ENCRYPTED_VSCODE_PASSWORD\"" >> .env
+              echo "VSCODE_RESTART_POLICY=unless-stopped" >> .env
               docker compose up vscode -d
             else
               docker compose stop vscode
@@ -233,6 +234,7 @@ jobs:
             if [ $START_PGADMIN == 'true' ]
             then
               docker compose up pgadmin -d
+              echo "PGADMIN_RESTART_POLICY=unless-stopped" >> .env
             else
               docker compose stop pgadmin
             fi
