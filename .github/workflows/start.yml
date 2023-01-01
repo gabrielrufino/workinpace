@@ -33,9 +33,9 @@ jobs:
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ env.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             if [ ! $(which htpasswd) ]
             then
@@ -51,10 +51,10 @@ jobs:
       - name: Install docker using SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             if [ ! $(which docker) ]
             then
@@ -82,10 +82,10 @@ jobs:
       - name: Install git using SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             if [ ! $(which git) ]
             then
@@ -101,10 +101,10 @@ jobs:
       - name: Install ufw using SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             if [ ! $(which ufw) ]
             then
@@ -120,10 +120,10 @@ jobs:
       - name: Clone compose using SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             DOCKER_COMPOSE_FOLDER=$HOME/docker-compose.yml
             if [ ! -d $DOCKER_COMPOSE_FOLDER ]
@@ -144,10 +144,10 @@ jobs:
       - name: Setup firewall using SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             ufw deny 3003
             ufw deny 16543
@@ -169,10 +169,10 @@ jobs:
       - name: Setup traefik
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             cd $HOME/docker-compose.yml
             echo "TRAEFIK_BASE_HOST=$DOMAIN" >> .env
@@ -192,11 +192,10 @@ jobs:
           VSCODE_USERNAME: ${{ secrets.VSCODE_USERNAME || 'admin' }}
           VSCODE_PASSWORD: ${{ secrets.VSCODE_PASSWORD || 'admin' }}
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
-          envs: VSCODE_USERNAME,VSCODE_PASSWORD
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             cd $HOME/docker-compose.yml
             ENCRYPTED_VSCODE_PASSWORD=$(htpasswd -nbs $VSCODE_USERNAME $VSCODE_PASSWORD | cut -d ':' -f 2)
@@ -207,10 +206,10 @@ jobs:
         if: ${{ !github.event.inputs.vscode }}
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             cd $HOME/docker-compose.yml
             docker compose stop vscode
@@ -224,10 +223,10 @@ jobs:
         if: ${{ github.event.inputs.pgadmin }}
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             cd $HOME/docker-compose.yml
             docker compose up pgadmin -d
@@ -235,10 +234,10 @@ jobs:
         if: ${{ !github.event.inputs.pgadmin }}
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_SSH_HOST }}
-          username: ${{ secrets.SERVER_SSH_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
           script: |
             cd $HOME/docker-compose.yml
             docker compose stop pgadmin
