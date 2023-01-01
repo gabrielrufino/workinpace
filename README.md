@@ -10,5 +10,6 @@ Cloud environment for coding
 | SERVER_SSH_PORT  | true          |                   |
 | SERVER_SSH_USER  | true          |                   |
 | SERVER_SSH_KEY   | true          |                   |
+| ACME_EMAIL       | true          |                   |
 | VSCODE_USERNAME  | false         | admin             |
 | VSCODE_PASSWORD  | false         | admin             |

@@ -142,6 +142,8 @@ jobs:
       - docker
       - compose
       - firewall
+    env:
+      ACME_EMAIL: ${{ secrets.ACME_EMAIL }}
     steps:
       - name: Setup traefik
         uses: appleboy/ssh-action@v0.1.6
@@ -153,6 +155,7 @@ jobs:
           script: |
             cd $HOME/docker-compose.yml
             echo "TRAEFIK_BASE_HOST=workspeace.gabrielrufino.com" >> .env
+            echo "TRAEFIK_ACME_EMAIL=$ACME_EMAIL" >> .env
             docker compose up traefik -d
   vscode:
     name: VSCode
