@@ -223,6 +223,8 @@ jobs:
         uses: appleboy/ssh-action@v0.1.6
         env:
           START_PGADMIN: ${{ github.event.inputs.pgadmin }}
+          PGADMIN_USERNAME: ${{ secrets.PGADMIN_USERNAME || 'admin' }}
+          PGADMIN_PASSWORD: ${{ secrets.PGADMIN_PASSWORD || 'admin' }}
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
@@ -235,6 +237,8 @@ jobs:
             if [ $START_PGADMIN == 'true' ]
             then
               docker compose up pgadmin -d
+              echo "PGADMIN_DEFAULT_EMAIL=$PGADMIN_USERNAME" >> .env
+              echo "PGADMIN_DEFAULT_PASSWORD=$PGADMIN_PASSWORD" >> .env
               echo "PGADMIN_RESTART_POLICY=unless-stopped" >> .env
             else
               docker compose stop pgadmin
