@@ -9,6 +9,9 @@ on:
       pgadmin:
         type: boolean
         default: false
+      redisinsight:
+        type: boolean
+        default: false
 
 env:
   SERVER_SSH_HOST: ${{ secrets.SERVER_SSH_HOST }}
@@ -242,4 +245,30 @@ jobs:
               docker compose up pgadmin -d
             else
               docker compose stop pgadmin
+            fi
+  redisinsight:
+    name: RedisInsight
+    runs-on: ubuntu-latest
+    needs:
+      - traefik
+    steps:
+      - name: Starts or stops RedisInsight using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        env:
+          START_REDISINSIGHT: ${{ github.event.inputs.redisinsight }}
+        with:
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          envs: START_REDISINSIGHT
+          script: |
+            cd $HOME/docker-compose.yml
+
+            if [ $START_REDISINSIGHT == 'true' ]
+            then
+              echo "REDISINSIGHT_RESTART_POLICY=unless-stopped" >> .env
+              docker compose up redisinsight -d
+            else
+              docker compose stop redisinsight
             fi
