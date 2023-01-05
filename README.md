@@ -4,12 +4,12 @@ Cloud environment for coding
 
 ## DNS & Subdomains
 
-| **Name** | **Type** | **Value**              | **How to access**              |
-| -------- | -------- | ---------------------- | ------------------------------ |
-| @        | A        | 127.0.0.1              | workspeace.example.com         |
-| pgadmin  | CNAME    | workspeace.example.com | pgadmin.workspeace.example.com |
-| vscode   | CNAME    | workspeace.example.com | vscode.workspeace.example.com  |
-
+| **Name**       | **Type** | **Value**              | **How to access**              |
+| -------------- | -------- | ---------------------- | ------------------------------ |
+| @              | A        | 127.0.0.1              | workspeace.example.com         |
+| pgadmin        | CNAME    | workspeace.example.com | pgadmin.workspeace.example.com |
+| vscode         | CNAME    | workspeace.example.com | vscode.workspeace.example.com  |
+| redisinsight   | CNAME    | workspeace.example.com | vscode.workspeace.example.com  |
 
 ## Environment variables
 
