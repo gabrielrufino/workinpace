@@ -225,7 +225,6 @@ jobs:
       - traefik
     steps:
       - name: Starts or stops pgAdmin using SSH
-        if: ${{ github.event.inputs.pgadmin }}
         uses: appleboy/ssh-action@v0.1.6
         env:
           START_PGADMIN: ${{ github.event.inputs.pgadmin }}
@@ -236,7 +235,7 @@ jobs:
           username: ${{ env.SERVER_SSH_USER }}
           key: ${{ env.SERVER_SSH_KEY }}
           port: ${{ env.SERVER_SSH_PORT }}
-          envs: START_PGADMIN
+          envs: START_PGADMIN,PGADMIN_USERNAME,PGADMIN_PASSWORD
           script: |
             cd $HOME/docker-compose.yml
 
