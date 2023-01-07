@@ -118,6 +118,7 @@ jobs:
             then
               apt update
               apt install ufw -y
+              ufw --force enable
 
               wget -O /usr/local/bin/ufw-docker \
                 https://github.com/chaifeng/ufw-docker/raw/master/ufw-docker
