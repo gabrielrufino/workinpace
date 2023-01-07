@@ -118,6 +118,11 @@ jobs:
             then
               apt update
               apt install ufw -y
+
+              wget -O /usr/local/bin/ufw-docker \
+                https://github.com/chaifeng/ufw-docker/raw/master/ufw-docker
+              chmod +x /usr/local/bin/ufw-docker
+              ufw-docker install
             fi
   compose:
     name: Setup compose
@@ -158,14 +163,11 @@ jobs:
           key: ${{ env.SERVER_SSH_KEY }}
           port: ${{ env.SERVER_SSH_PORT }}
           script: |
-            ufw deny 3003
-            ufw deny 5432
-            ufw deny 8001
-            ufw deny 16543
+            ufw default deny
             ufw allow 22
-            ufw allow 80
-            ufw allow 443
-            ufw enable
+            ufw allow 80/tcp
+            ufw allow 443/tcp
+            ufw --force enable
             ufw reload
   traefik:
     name: Starts traefik
