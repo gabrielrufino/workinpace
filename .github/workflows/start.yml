@@ -118,13 +118,16 @@ jobs:
             then
               apt update
               apt install ufw -y
-              ufw --force enable
+            fi
+            ufw --force enable
 
+            if [ ! $(which ufw-docker) ]
+            then
               wget -O /usr/local/bin/ufw-docker \
                 https://github.com/chaifeng/ufw-docker/raw/master/ufw-docker
               chmod +x /usr/local/bin/ufw-docker
-              ufw-docker install
             fi
+            ufw-docker install
   compose:
     name: Setup compose
     runs-on: ubuntu-latest
