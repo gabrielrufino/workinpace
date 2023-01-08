@@ -238,7 +238,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.6
         env:
           START_PGADMIN: ${{ github.event.inputs.pgadmin }}
-          PGADMIN_USERNAME: ${{ secrets.PGADMIN_USERNAME || 'admin' }}
+          PGADMIN_USERNAME: ${{ secrets.PGADMIN_USERNAME || 'admin@admin.com' }}
           PGADMIN_PASSWORD: ${{ secrets.PGADMIN_PASSWORD || 'admin' }}
         with:
           host: ${{ env.SERVER_SSH_HOST }}

@@ -23,5 +23,5 @@ Cloud environment for coding
 | ACME_EMAIL        | true          |                   |
 | VSCODE_USERNAME   | false         | admin             |
 | VSCODE_PASSWORD   | false         | admin             |
-| PGADMIN_PASSWORD  | false         | admin             |
+| PGADMIN_EMAIL     | false         | admin@admin.com   |
 | PGADMIN_PASSWORD  | false         | admin             |
