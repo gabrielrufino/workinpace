@@ -9,6 +9,12 @@ on:
       pgadmin:
         type: boolean
         default: false
+      postgresql:
+        type: boolean
+        default: false
+      redisinsight:
+        type: boolean
+        default: false
 
 env:
   SERVER_SSH_HOST: ${{ secrets.SERVER_SSH_HOST }}
@@ -113,6 +119,13 @@ jobs:
               apt update
               apt install ufw -y
             fi
+
+            if [ ! $(which ufw-docker) ]
+            then
+              wget -O /usr/local/bin/ufw-docker \
+                https://github.com/chaifeng/ufw-docker/raw/master/ufw-docker
+              chmod +x /usr/local/bin/ufw-docker
+            fi
   compose:
     name: Setup compose
     runs-on: ubuntu-latest
@@ -137,6 +150,7 @@ jobs:
               git pull
             fi
             cp .env.default .env
+            printf "\n#Custom\n" >> .env
   firewall:
     name: Setup firewall
     runs-on: ubuntu-latest
@@ -151,12 +165,13 @@ jobs:
           key: ${{ env.SERVER_SSH_KEY }}
           port: ${{ env.SERVER_SSH_PORT }}
           script: |
-            ufw deny 3003
-            ufw deny 16543
-            ufw allow 22
-            ufw allow 80
-            ufw allow 443
-            ufw enable
+            ufw --force enable
+            ufw-docker install
+
+            ufw allow ssh
+            ufw allow http
+            ufw allow https
+            ufw reload
   traefik:
     name: Starts traefik
     runs-on: ubuntu-latest
@@ -175,9 +190,12 @@ jobs:
           envs: DOMAIN,ACME_EMAIL
           script: |
             cd $HOME/docker-compose.yml
+            echo "TRAEFIK_CONTAINER_NAME=workspeace-traefik" >> .env
             echo "TRAEFIK_BASE_HOST=$DOMAIN" >> .env
             echo "TRAEFIK_ACME_EMAIL=$ACME_EMAIL" >> .env
+            echo "TRAEFIK_RESTART_POLICY=always" >> .env
             docker compose up traefik -d
+            ufw-docker allow workspeace-traefik
   vscode:
     name: VSCode
     runs-on: ubuntu-latest
@@ -185,10 +203,10 @@ jobs:
       - htpasswd
       - traefik
     steps:
-      - name: Starts vscode using SSH
-        if: ${{ github.event.inputs.vscode }}
+      - name: Starts or stops VSCode using SSH
         uses: appleboy/ssh-action@v0.1.6
         env:
+          START_VSCODE: ${{ github.event.inputs.vscode }}
           VSCODE_USERNAME: ${{ secrets.VSCODE_USERNAME || 'admin' }}
           VSCODE_PASSWORD: ${{ secrets.VSCODE_PASSWORD || 'admin' }}
         with:
@@ -196,32 +214,118 @@ jobs:
           username: ${{ env.SERVER_SSH_USER }}
           key: ${{ env.SERVER_SSH_KEY }}
           port: ${{ env.SERVER_SSH_PORT }}
-          envs: VSCODE_USERNAME,VSCODE_PASSWORD
+          envs: START_VSCODE,VSCODE_USERNAME,VSCODE_PASSWORD
           script: |
             cd $HOME/docker-compose.yml
-            ENCRYPTED_VSCODE_PASSWORD=$(htpasswd -nbs $VSCODE_USERNAME $VSCODE_PASSWORD | cut -d ':' -f 2)
-            echo "VSCODE_TRAEFIK_USERNAME=$VSCODE_USERNAME" >> .env
-            echo "VSCODE_TRAEFIK_PASSWORD=\"$ENCRYPTED_VSCODE_PASSWORD\"" >> .env
-            docker compose up vscode -d
-      - name: Stops vscode using SSH
-        if: ${{ !github.event.inputs.vscode }}
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ env.SERVER_SSH_HOST }}
-          username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
-          port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            cd $HOME/docker-compose.yml
-            docker compose stop vscode
+
+            if [ $START_VSCODE = 'true' ]
+            then
+              ENCRYPTED_VSCODE_PASSWORD=$(htpasswd -nbs $VSCODE_USERNAME $VSCODE_PASSWORD | cut -d ':' -f 2)
+              echo "VSCODE_TRAEFIK_USERNAME=$VSCODE_USERNAME" >> .env
+              echo "VSCODE_TRAEFIK_PASSWORD=\"$ENCRYPTED_VSCODE_PASSWORD\"" >> .env
+              echo "VSCODE_RESTART_POLICY=unless-stopped" >> .env
+              docker compose up vscode -d
+            else
+              docker compose stop vscode
+            fi
   pgadmin:
     name: pgAdmin
     runs-on: ubuntu-latest
     needs:
       - traefik
     steps:
-      - name: Starts pgadmin using SSH
-        if: ${{ github.event.inputs.pgadmin }}
+      - name: Starts or stops pgAdmin using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        env:
+          START_PGADMIN: ${{ github.event.inputs.pgadmin }}
+          PGADMIN_USERNAME: ${{ secrets.PGADMIN_USERNAME || 'admin@admin.com' }}
+          PGADMIN_PASSWORD: ${{ secrets.PGADMIN_PASSWORD || 'admin' }}
+        with:
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          envs: START_PGADMIN,PGADMIN_USERNAME,PGADMIN_PASSWORD
+          script: |
+            cd $HOME/docker-compose.yml
+
+            if [ $START_PGADMIN == 'true' ]
+            then
+              echo "PGADMIN_DEFAULT_EMAIL=$PGADMIN_USERNAME" >> .env
+              echo "PGADMIN_DEFAULT_PASSWORD=$PGADMIN_PASSWORD" >> .env
+              echo "PGADMIN_RESTART_POLICY=unless-stopped" >> .env
+              docker compose up pgadmin -d
+            else
+              docker compose stop pgadmin
+            fi
+  postgresql:
+    name: PostgreSQL
+    runs-on: ubuntu-latest
+    needs:
+      - compose
+      - docker
+      - firewall
+    steps:
+      - name: Starts or stops PostgreSQL using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        env:
+          START_POSTGRESQL: ${{ github.event.inputs.postgresql }}
+          POSTGRESQL_USER: ${{ secrets.POSTGRESQL_USER || 'admin' }}
+          POSTGRESQL_PASSWORD: ${{ secrets.POSTGRESQL_PASSWORD || 'admin' }}
+        with:
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          envs: START_POSTGRESQL,POSTGRESQL_USER,POSTGRESQL_PASSWORD
+          script: |
+            cd $HOME/docker-compose.yml
+
+            if [ $START_POSTGRESQL == 'true' ]
+            then
+              echo "POSTGRESQL_USER=$POSTGRESQL_USER" >> .env
+              echo "POSTGRESQL_PASSWORD=$POSTGRESQL_PASSWORD" >> .env    
+              echo "POSTGRESQL_RESTART_POLICY=unless-stopped" >> .env
+              docker compose up postgres -d
+            else
+              docker compose stop postgres
+            fi
+  redisinsight:
+    name: RedisInsight
+    runs-on: ubuntu-latest
+    needs:
+      - traefik
+    steps:
+      - name: Starts or stops RedisInsight using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        env:
+          START_REDISINSIGHT: ${{ github.event.inputs.redisinsight }}
+        with:
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          envs: START_REDISINSIGHT
+          script: |
+            cd $HOME/docker-compose.yml
+
+            if [ $START_REDISINSIGHT == 'true' ]
+            then
+              echo "REDISINSIGHT_RESTART_POLICY=unless-stopped" >> .env
+              docker compose up redisinsight -d
+            else
+              docker compose stop redisinsight
+            fi
+  cleanup:
+    name: Clean Up
+    runs-on: ubuntu-latest
+    needs:
+      - vscode
+      - pgadmin
+      - postgresql
+      - redisinsight
+    steps:
+      - name: Cleans up server using SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ env.SERVER_SSH_HOST }}
@@ -229,16 +333,4 @@ jobs:
           key: ${{ env.SERVER_SSH_KEY }}
           port: ${{ env.SERVER_SSH_PORT }}
           script: |
-            cd $HOME/docker-compose.yml
-            docker compose up pgadmin -d
-      - name: Stops pgadmin using SSH
-        if: ${{ !github.event.inputs.pgadmin }}
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ env.SERVER_SSH_HOST }}
-          username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
-          port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            cd $HOME/docker-compose.yml
-            docker compose stop pgadmin
+            docker image prune --all --force
