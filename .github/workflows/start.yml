@@ -231,7 +231,7 @@ jobs:
             then
               ENCRYPTED_VSCODE_PASSWORD=$(htpasswd -nbs $VSCODE_USERNAME $VSCODE_PASSWORD | cut -d ':' -f 2)
 
-              echo "VSCODE_CONTAINER_NAME=vscode-workspeace" >> .env
+              echo "VSCODE_CONTAINER_NAME=workspeace-vscode" >> .env
               echo "VSCODE_TRAEFIK_USERNAME=$VSCODE_USERNAME" >> .env
               echo "VSCODE_TRAEFIK_PASSWORD=\"$ENCRYPTED_VSCODE_PASSWORD\"" >> .env
               echo "VSCODE_RESTART_POLICY=unless-stopped" >> .env
@@ -262,7 +262,7 @@ jobs:
 
             if [ $START_PGADMIN == 'true' ]
             then
-              echo "PGADMIN_CONTAINER_NAME=pgadmin-workspeace" >> .env
+              echo "PGADMIN_CONTAINER_NAME=workspeace-pgadmin" >> .env
               echo "PGADMIN_DEFAULT_EMAIL=$PGADMIN_USERNAME" >> .env
               echo "PGADMIN_DEFAULT_PASSWORD=$PGADMIN_PASSWORD" >> .env
               echo "PGADMIN_RESTART_POLICY=unless-stopped" >> .env
@@ -295,7 +295,7 @@ jobs:
 
             if [ $START_POSTGRESQL == 'true' ]
             then
-              echo "POSTGRESQL_CONTAINER_NAME=postgres-workspeace" >> .env
+              echo "POSTGRESQL_CONTAINER_NAME=workspeace-postgres" >> .env
               echo "POSTGRESQL_USER=$POSTGRESQL_USER" >> .env
               echo "POSTGRESQL_PASSWORD=$POSTGRESQL_PASSWORD" >> .env    
               echo "POSTGRESQL_RESTART_POLICY=unless-stopped" >> .env
@@ -324,7 +324,7 @@ jobs:
 
             if [ $START_REDISINSIGHT == 'true' ]
             then
-              echo "REDISINSIGHT_CONTAINER_NAME=redisinsight-workspeace" >> .env
+              echo "REDISINSIGHT_CONTAINER_NAME=workspeace-redisinsight" >> .env
               echo "REDISINSIGHT_RESTART_POLICY=unless-stopped" >> .env
               docker compose up redisinsight -d
             else
