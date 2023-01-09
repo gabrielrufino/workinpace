@@ -190,7 +190,7 @@ jobs:
           username: ${{ env.SERVER_SSH_USER }}
           key: ${{ env.SERVER_SSH_KEY }}
           port: ${{ env.SERVER_SSH_PORT }}
-          envs: DOMAIN,ACME_EMAIL
+          envs: TRAEFIK_DASHBOARD_USERNAME,TRAEFIK_DASHBOARD_PASSWORD,DOMAIN,ACME_EMAIL
           script: |
             cd $HOME/docker-compose.yml
 
