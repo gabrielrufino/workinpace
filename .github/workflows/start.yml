@@ -149,8 +149,7 @@ jobs:
               cd $DOCKER_COMPOSE_FOLDER
               git pull
             fi
-            cp .env.default .env
-            printf "\n#Custom\n" >> .env
+            printf "# Environment variables\n\n" > .env
   firewall:
     name: Setup firewall
     runs-on: ubuntu-latest
