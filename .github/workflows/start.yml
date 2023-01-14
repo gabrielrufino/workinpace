@@ -5,7 +5,7 @@ on:
     inputs:
       vscode:
         type: boolean
-        default: true
+        default: false
       pgadmin:
         type: boolean
         default: false
