@@ -15,6 +15,9 @@ on:
       redisinsight:
         type: boolean
         default: false
+      hoppscotch:
+        type: boolean
+        default: false
 
 env:
   SERVER_SSH_HOST: ${{ secrets.SERVER_SSH_HOST }}
@@ -268,6 +271,33 @@ jobs:
               docker compose up pgadmin -d
             else
               docker compose stop pgadmin
+            fi
+  hoppscotch:
+    name: Hoppscotch
+    runs-on: ubuntu-latest
+    needs:
+      - traefik
+    steps:
+      - name: Starts or stops Hoppscotch using SSH
+        uses: appleboy/ssh-action@v0.1.6
+        env:
+          START_HOPPSCOTCH: ${{ github.event.inputs.hoppscotch }}
+        with:
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          key: ${{ env.SERVER_SSH_KEY }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          envs: START_HOPPSCOTCH
+          script: |
+            cd $HOME/docker-compose.yml
+
+            if [ $START_HOPPSCOTCH == 'true' ]
+            then
+              echo "HOPPSCOTCH_CONTAINER_NAME=workspeace-hoppscotch" >> .env
+              echo "HOPPSCOTCH_RESTART_POLICY=unless-stopped" >> .env
+              docker compose up hoppscotch -d
+            else
+              docker compose stop hoppscotch
             fi
   postgresql:
     name: PostgreSQL
