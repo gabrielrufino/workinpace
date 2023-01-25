@@ -32,7 +32,7 @@ jobs:
     name: Validates variables
     runs-on: ubuntu-latest
     steps:
-      - if: ${{ env.SERVER_SSH_HOST == '' || env.SERVER_SSH_USER == '' || env.SERVER_SSH_KEY == '' || env.SERVER_SSH_PORT == '' || env.DOMAIN == '' || env.ACME_EMAIL == '' }}
+      - if: ${{ env.SERVER_SSH_HOST == '' || env.SERVER_SSH_USER == '' || env.SERVER_SSH_PASSWORD == '' || env.SERVER_SSH_PORT == '' || env.DOMAIN == '' || env.ACME_EMAIL == '' }}
         run: exit 1
   htpasswd:
     name: Install htpasswd
