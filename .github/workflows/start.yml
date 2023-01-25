@@ -22,7 +22,7 @@ on:
 env:
   SERVER_SSH_HOST: ${{ secrets.SERVER_SSH_HOST }}
   SERVER_SSH_USER: ${{ secrets.SERVER_SSH_USER }}
-  SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+  SERVER_SSH_PASSWORD: ${{ secrets.SERVER_SSH_PASSWORD }}
   SERVER_SSH_PORT: ${{ secrets.SERVER_SSH_PORT }}
   DOMAIN: ${{ secrets.DOMAIN }}
   ACME_EMAIL: ${{ secrets.ACME_EMAIL }}
@@ -32,7 +32,7 @@ jobs:
     name: Validates variables
     runs-on: ubuntu-latest
     steps:
-      - if: ${{ env.SERVER_SSH_HOST == '' || env.SERVER_SSH_USER == '' || env.SERVER_SSH_KEY == '' || env.SERVER_SSH_PORT == '' || env.DOMAIN == '' || env.ACME_EMAIL == '' }}
+      - if: ${{ env.SERVER_SSH_HOST == '' || env.SERVER_SSH_USER == '' || env.SERVER_SSH_PASSWORD == '' || env.SERVER_SSH_PORT == '' || env.DOMAIN == '' || env.ACME_EMAIL == '' }}
         run: exit 1
   htpasswd:
     name: Install htpasswd
@@ -41,11 +41,11 @@ jobs:
       - validation
     steps:
       - name: Install htpasswd using SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           script: |
             if [ ! $(which htpasswd) ]
@@ -60,11 +60,11 @@ jobs:
       - validation
     steps:
       - name: Install docker using SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           script: |
             if [ ! $(which docker) ]
@@ -91,11 +91,11 @@ jobs:
       - validation
     steps:
       - name: Install git using SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           script: |
             if [ ! $(which git) ]
@@ -110,11 +110,11 @@ jobs:
       - validation
     steps:
       - name: Install ufw using SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           script: |
             if [ ! $(which ufw) ]
@@ -136,11 +136,11 @@ jobs:
       - git
     steps:
       - name: Clone compose using SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           script: |
             DOCKER_COMPOSE_FOLDER=$HOME/docker-compose.yml
@@ -160,11 +160,11 @@ jobs:
       - ufw
     steps:
       - name: Setup firewall using SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           script: |
             ufw --force enable
@@ -183,14 +183,14 @@ jobs:
       - firewall
     steps:
       - name: Setup traefik
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.7
         env:
           TRAEFIK_DASHBOARD_USERNAME: ${{ secrets.TRAEFIK_DASHBOARD_USERNAME || 'admin' }}
           TRAEFIK_DASHBOARD_PASSWORD: ${{ secrets.TRAEFIK_DASHBOARD_PASSWORD || 'admin' }}
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: TRAEFIK_DASHBOARD_USERNAME,TRAEFIK_DASHBOARD_PASSWORD,DOMAIN,ACME_EMAIL
           script: |
@@ -215,7 +215,7 @@ jobs:
       - traefik
     steps:
       - name: Starts or stops VSCode using SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.7
         env:
           START_VSCODE: ${{ github.event.inputs.vscode }}
           VSCODE_USERNAME: ${{ secrets.VSCODE_USERNAME || 'admin' }}
@@ -223,7 +223,7 @@ jobs:
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_VSCODE,VSCODE_USERNAME,VSCODE_PASSWORD
           script: |
@@ -248,7 +248,7 @@ jobs:
       - traefik
     steps:
       - name: Starts or stops pgAdmin using SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.7
         env:
           START_PGADMIN: ${{ github.event.inputs.pgadmin }}
           PGADMIN_USERNAME: ${{ secrets.PGADMIN_USERNAME || 'admin@admin.com' }}
@@ -256,7 +256,7 @@ jobs:
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_PGADMIN,PGADMIN_USERNAME,PGADMIN_PASSWORD
           script: |
@@ -279,13 +279,13 @@ jobs:
       - traefik
     steps:
       - name: Starts or stops Hoppscotch using SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.7
         env:
           START_HOPPSCOTCH: ${{ github.event.inputs.hoppscotch }}
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_HOPPSCOTCH
           script: |
@@ -308,7 +308,7 @@ jobs:
       - firewall
     steps:
       - name: Starts or stops PostgreSQL using SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.7
         env:
           START_POSTGRESQL: ${{ github.event.inputs.postgresql }}
           POSTGRESQL_USER: ${{ secrets.POSTGRESQL_USER || 'admin' }}
@@ -316,7 +316,7 @@ jobs:
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_POSTGRESQL,POSTGRESQL_USER,POSTGRESQL_PASSWORD
           script: |
@@ -339,13 +339,13 @@ jobs:
       - traefik
     steps:
       - name: Starts or stops RedisInsight using SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.7
         env:
           START_REDISINSIGHT: ${{ github.event.inputs.redisinsight }}
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_REDISINSIGHT
           script: |
@@ -369,11 +369,11 @@ jobs:
       - redisinsight
     steps:
       - name: Cleans up server using SSH
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
-          key: ${{ env.SERVER_SSH_KEY }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           script: |
             docker image prune --all --force
