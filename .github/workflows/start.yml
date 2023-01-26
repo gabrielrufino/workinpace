@@ -379,13 +379,14 @@ jobs:
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          envs: START_REDISINSIGHT
+          envs: START_REDISINSIGHT,SERVER_SSH_HOST
           script: |
             cd $HOME/docker-compose.yml
 
             if [ $START_REDISINSIGHT == 'true' ]
             then
               echo "REDISINSIGHT_CONTAINER_NAME=workspeace-redisinsight" >> .env
+              echo "REDISINSIGHT_RITRUSTEDORIGINS=https://redisinsight.$SERVER_SSH_HOST" >> .env
               echo "REDISINSIGHT_RESTART_POLICY=unless-stopped" >> .env
               docker compose up redisinsight -d
             else
