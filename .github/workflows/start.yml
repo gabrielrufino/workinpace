@@ -6,10 +6,10 @@ on:
       vscode:
         type: boolean
         default: false
-      pgadmin:
+      postgresql:
         type: boolean
         default: false
-      postgresql:
+      pgadmin:
         type: boolean
         default: false
       redisinsight:
