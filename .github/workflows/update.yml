@@ -33,7 +33,10 @@ jobs:
           password: ${{ secrets.SERVER_SSH_PASSWORD }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
-            cd $HOME/docker-compose.yml
-            docker compose exec vscode sudo apt update
-            docker compose exec vscode sudo apt upgrade -y 
-            docker compose exec vscode sudo apt autoremove -y
+            if [ "$( docker container inspect -f '{{.State.Running}}' workspeace-vscode )" == "true" ]
+            then
+              cd $HOME/docker-compose.yml
+              docker compose exec vscode sudo apt update
+              docker compose exec vscode sudo apt upgrade -y 
+              docker compose exec vscode sudo apt autoremove -y
+            fi
