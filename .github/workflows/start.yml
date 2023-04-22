@@ -433,6 +433,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - vscode
+      - mongodb
       - postgresql
       - pgadmin
       - redis
