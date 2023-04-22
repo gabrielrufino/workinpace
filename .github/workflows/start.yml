@@ -6,6 +6,9 @@ on:
       vscode:
         type: boolean
         default: false
+      mongodb:
+        type: boolean
+        default: false
       postgresql:
         type: boolean
         default: false
@@ -301,6 +304,39 @@ jobs:
               docker compose up hoppscotch -d
             else
               docker compose stop hoppscotch
+            fi
+  mongodb:
+    name: MongoDB
+    runs-on: ubuntu-latest
+    needs:
+      - compose
+      - docker
+      - firewall
+    steps:
+      - name: Starts or stops MongoDB using SSH
+        uses: appleboy/ssh-action@v0.1.7
+        env:
+          START_MONGODB: ${{ github.event.inputs.mongodb }}
+          MONGODB_USER: ${{ secrets.MONGODB_USER || 'root' }}
+          MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD || 'root' }}
+        with:
+          host: ${{ env.SERVER_SSH_HOST }}
+          username: ${{ env.SERVER_SSH_USER }}
+          password: ${{ env.SERVER_SSH_PASSWORD }}
+          port: ${{ env.SERVER_SSH_PORT }}
+          envs: START_MONGODB,MONGODB_USER,MONGODB_PASSWORD
+          script: |
+            cd $HOME/docker-compose.yml
+
+            if [ $START_MONGODB == 'true' ]
+            then
+              echo "MONGO_CONTAINER_NAME=workspeace-mongodb" >> .env
+              echo "MONGO_INITDB_ROOT_USERNAME=$MONGODB_USER" >> .env
+              echo "MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD" >> .env
+              echo "MONGO_RESTART_POLICY=unless-stopped" >> .env
+              docker compose up mongo -d
+            else
+              docker compose stop mongo
             fi
   postgresql:
     name: PostgreSQL
