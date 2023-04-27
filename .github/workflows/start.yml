@@ -46,7 +46,7 @@ jobs:
     needs:
       - validation
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
@@ -64,7 +64,7 @@ jobs:
     needs:
       - validation
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
@@ -94,7 +94,7 @@ jobs:
     needs:
       - validation
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
@@ -112,7 +112,7 @@ jobs:
     needs:
       - validation
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
@@ -137,7 +137,7 @@ jobs:
     needs:
       - git
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
@@ -160,7 +160,7 @@ jobs:
     needs:
       - ufw
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
@@ -182,7 +182,7 @@ jobs:
       - compose
       - firewall
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           TRAEFIK_DASHBOARD_USERNAME: ${{ secrets.TRAEFIK_DASHBOARD_USERNAME || 'admin' }}
           TRAEFIK_DASHBOARD_PASSWORD: ${{ secrets.TRAEFIK_DASHBOARD_PASSWORD || 'admin' }}
@@ -213,7 +213,7 @@ jobs:
       - htpasswd
       - traefik
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_VSCODE: ${{ github.event.inputs.vscode }}
           VSCODE_USERNAME: ${{ secrets.VSCODE_USERNAME || 'admin' }}
@@ -245,7 +245,7 @@ jobs:
     needs:
       - traefik
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_PGADMIN: ${{ github.event.inputs.pgadmin }}
           PGADMIN_USERNAME: ${{ secrets.PGADMIN_USERNAME || 'admin@admin.com' }}
@@ -275,7 +275,7 @@ jobs:
     needs:
       - traefik
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_HOPPSCOTCH: ${{ github.event.inputs.hoppscotch }}
         with:
@@ -303,7 +303,7 @@ jobs:
       - docker
       - firewall
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_MONGODB: ${{ github.event.inputs.mongodb }}
           MONGODB_USER: ${{ secrets.MONGODB_USER || 'root' }}
@@ -335,7 +335,7 @@ jobs:
       - docker
       - firewall
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_POSTGRESQL: ${{ github.event.inputs.postgresql }}
           POSTGRESQL_USER: ${{ secrets.POSTGRESQL_USER || 'admin' }}
@@ -367,7 +367,7 @@ jobs:
       - docker
       - firewall
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_REDIS: ${{ github.event.inputs.redis }}
         with:
@@ -393,7 +393,7 @@ jobs:
     needs:
       - traefik
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_REDISINSIGHT: ${{ github.event.inputs.redisinsight }}
         with:
@@ -426,7 +426,7 @@ jobs:
       - redisinsight
       - hoppscotch
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
