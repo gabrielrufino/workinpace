@@ -229,6 +229,11 @@ jobs:
     needs:
       - traefik
     steps:
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/pgadmin.sh
       - uses: appleboy/ssh-action@v0.1.10
         env:
           START_PGADMIN: ${{ github.event.inputs.pgadmin }}
@@ -240,19 +245,7 @@ jobs:
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_PGADMIN,PGADMIN_USERNAME,PGADMIN_PASSWORD
-          script: |
-            cd $HOME/docker-compose.yml
-
-            if [ $START_PGADMIN == 'true' ]
-            then
-              echo "PGADMIN_CONTAINER_NAME=workspeace-pgadmin" >> .env
-              echo "PGADMIN_DEFAULT_EMAIL=$PGADMIN_USERNAME" >> .env
-              echo "PGADMIN_DEFAULT_PASSWORD=$PGADMIN_PASSWORD" >> .env
-              echo "PGADMIN_RESTART_POLICY=unless-stopped" >> .env
-              docker compose up pgadmin -d
-            else
-              docker compose stop pgadmin
-            fi
+          script: ${{ steps.script.outputs.content }}
   hoppscotch:
     name: Hoppscotch
     runs-on: ubuntu-latest
