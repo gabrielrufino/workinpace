@@ -112,25 +112,18 @@ jobs:
     needs:
       - validation
     steps:
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/ufw.sh
       - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            if [ ! $(which ufw) ]
-            then
-              apt update
-              apt install ufw -y
-            fi
-
-            if [ ! $(which ufw-docker) ]
-            then
-              wget -O /usr/local/bin/ufw-docker \
-                https://github.com/chaifeng/ufw-docker/raw/master/ufw-docker
-              chmod +x /usr/local/bin/ufw-docker
-            fi
+          script: ${{ steps.script.outputs.content }}
   compose:
     name: Compose file
     runs-on: ubuntu-latest
