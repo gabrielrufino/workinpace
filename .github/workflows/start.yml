@@ -46,18 +46,18 @@ jobs:
     needs:
       - validation
     steps:
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/htpasswd.sh
       - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            if [ ! $(which htpasswd) ]
-            then
-              apt update
-              apt install apache2-utils -y
-            fi
+          script: ${{ steps.script.outputs.content }}
   docker:
     name: Docker
     runs-on: ubuntu-latest
