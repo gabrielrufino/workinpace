@@ -275,6 +275,11 @@ jobs:
       - docker
       - firewall
     steps:
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/mongodb.sh
       - uses: appleboy/ssh-action@v0.1.10
         env:
           START_MONGODB: ${{ github.event.inputs.mongodb }}
@@ -286,19 +291,7 @@ jobs:
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_MONGODB,MONGODB_USER,MONGODB_PASSWORD
-          script: |
-            cd $HOME/docker-compose.yml
-
-            if [ $START_MONGODB == 'true' ]
-            then
-              echo "MONGO_CONTAINER_NAME=workspeace-mongodb" >> .env
-              echo "MONGO_INITDB_ROOT_USERNAME=$MONGODB_USER" >> .env
-              echo "MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD" >> .env
-              echo "MONGO_RESTART_POLICY=unless-stopped" >> .env
-              docker compose up mongo -d
-            else
-              docker compose stop mongo
-            fi
+          script: ${{ steps.script.outputs.content }}
   postgresql:
     name: PostgreSQL
     runs-on: ubuntu-latest
