@@ -346,6 +346,11 @@ jobs:
     needs:
       - traefik
     steps:
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/redisinsight.sh
       - uses: appleboy/ssh-action@v0.1.10
         env:
           START_REDISINSIGHT: ${{ github.event.inputs.redisinsight }}
@@ -355,18 +360,7 @@ jobs:
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_REDISINSIGHT,SERVER_SSH_HOST
-          script: |
-            cd $HOME/docker-compose.yml
-
-            if [ $START_REDISINSIGHT == 'true' ]
-            then
-              echo "REDISINSIGHT_CONTAINER_NAME=workspeace-redisinsight" >> .env
-              echo "REDISINSIGHT_RITRUSTEDORIGINS=https://redisinsight.$SERVER_SSH_HOST" >> .env
-              echo "REDISINSIGHT_RESTART_POLICY=unless-stopped" >> .env
-              docker compose up redisinsight -d
-            else
-              docker compose stop redisinsight
-            fi
+          script: ${{ steps.script.outputs.content }}
   cleaning:
     name: Cleaning
     runs-on: ubuntu-latest
