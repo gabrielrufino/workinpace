@@ -82,18 +82,18 @@ jobs:
     needs:
       - validation
     steps:
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/git.sh
       - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            if [ ! $(which git) ]
-            then
-              apt update
-              apt install git -y
-            fi
+          script: ${{ steps.script.outputs.content }}
   ufw:
     name: UFW
     runs-on: ubuntu-latest
