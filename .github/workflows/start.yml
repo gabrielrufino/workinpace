@@ -136,20 +136,18 @@ jobs:
     needs:
       - ufw
     steps:
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/firewall.sh
       - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            ufw --force enable
-            ufw-docker install
-
-            ufw allow ssh
-            ufw allow http
-            ufw allow https
-            ufw reload
+          script: ${{ steps.script.outputs.content }}
   traefik:
     name: Traefik
     runs-on: ubuntu-latest
