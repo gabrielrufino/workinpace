@@ -300,6 +300,11 @@ jobs:
       - docker
       - firewall
     steps:
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/postgresql.sh
       - uses: appleboy/ssh-action@v0.1.10
         env:
           START_POSTGRESQL: ${{ github.event.inputs.postgresql }}
@@ -311,19 +316,7 @@ jobs:
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_POSTGRESQL,POSTGRESQL_USER,POSTGRESQL_PASSWORD
-          script: |
-            cd $HOME/docker-compose.yml
-
-            if [ $START_POSTGRESQL == 'true' ]
-            then
-              echo "POSTGRESQL_CONTAINER_NAME=workspeace-postgres" >> .env
-              echo "POSTGRESQL_USER=$POSTGRESQL_USER" >> .env
-              echo "POSTGRESQL_PASSWORD=$POSTGRESQL_PASSWORD" >> .env    
-              echo "POSTGRESQL_RESTART_POLICY=unless-stopped" >> .env
-              docker compose up postgres -d
-            else
-              docker compose stop postgres
-            fi
+          script: ${{ steps.script.outputs.content }}
   redis:
     name: Redis
     runs-on: ubuntu-latest
