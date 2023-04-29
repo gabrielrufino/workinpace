@@ -46,134 +46,108 @@ jobs:
     needs:
       - validation
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/htpasswd.sh
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            if [ ! $(which htpasswd) ]
-            then
-              apt update
-              apt install apache2-utils -y
-            fi
+          script: ${{ steps.script.outputs.content }}
   docker:
     name: Docker
     runs-on: ubuntu-latest
     needs:
       - validation
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/docker.sh
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            if [ ! $(which docker) ]
-            then
-              apt remove docker docker-engine docker.io containerd runc -y
-              apt update
-              apt install \
-                ca-certificates \
-                curl \
-                gnupg \
-                lsb-release -y
-              mkdir -p /etc/apt/keyrings
-              curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-              echo \
-                "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
-                $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-              apt update
-              apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
-            fi
+          script: ${{ steps.script.outputs.content }}
   git:
     name: Git
     runs-on: ubuntu-latest
     needs:
       - validation
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/git.sh
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            if [ ! $(which git) ]
-            then
-              apt update
-              apt install git -y
-            fi
+          script: ${{ steps.script.outputs.content }}
   ufw:
     name: UFW
     runs-on: ubuntu-latest
     needs:
       - validation
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/ufw.sh
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            if [ ! $(which ufw) ]
-            then
-              apt update
-              apt install ufw -y
-            fi
-
-            if [ ! $(which ufw-docker) ]
-            then
-              wget -O /usr/local/bin/ufw-docker \
-                https://github.com/chaifeng/ufw-docker/raw/master/ufw-docker
-              chmod +x /usr/local/bin/ufw-docker
-            fi
+          script: ${{ steps.script.outputs.content }}
   compose:
     name: Compose file
     runs-on: ubuntu-latest
     needs:
       - git
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/compose.sh
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            DOCKER_COMPOSE_FOLDER=$HOME/docker-compose.yml
-            if [ ! -d $DOCKER_COMPOSE_FOLDER ]
-            then
-              git clone https://github.com/gabrielrufino/docker-compose.yml.git $DOCKER_COMPOSE_FOLDER
-              cd $DOCKER_COMPOSE_FOLDER
-            else
-              cd $DOCKER_COMPOSE_FOLDER
-              git pull
-            fi
-            printf "# Environment variables\n\n" > .env
+          script: ${{ steps.script.outputs.content }}
   firewall:
     name: Firewall
     runs-on: ubuntu-latest
     needs:
       - ufw
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/firewall.sh
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            ufw --force enable
-            ufw-docker install
-
-            ufw allow ssh
-            ufw allow http
-            ufw allow https
-            ufw reload
+          script: ${{ steps.script.outputs.content }}
   traefik:
     name: Traefik
     runs-on: ubuntu-latest
@@ -182,7 +156,12 @@ jobs:
       - compose
       - firewall
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/traefik.sh
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           TRAEFIK_DASHBOARD_USERNAME: ${{ secrets.TRAEFIK_DASHBOARD_USERNAME || 'admin' }}
           TRAEFIK_DASHBOARD_PASSWORD: ${{ secrets.TRAEFIK_DASHBOARD_PASSWORD || 'admin' }}
@@ -192,20 +171,7 @@ jobs:
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: TRAEFIK_DASHBOARD_USERNAME,TRAEFIK_DASHBOARD_PASSWORD,DOMAIN,ACME_EMAIL
-          script: |
-            cd $HOME/docker-compose.yml
-
-            ENCRYPTED_TRAEFIK_PASSWORD=$(htpasswd -nbs $TRAEFIK_DASHBOARD_USERNAME $TRAEFIK_DASHBOARD_PASSWORD | cut -d ':' -f 2)
-
-            echo "TRAEFIK_CONTAINER_NAME=workspeace-traefik" >> .env
-            echo "TRAEFIK_BASE_HOST=$DOMAIN" >> .env
-            echo "TRAEFIK_ACME_EMAIL=$ACME_EMAIL" >> .env
-            echo "TRAEFIK_DASHBOARD_USERNAME=$TRAEFIK_DASHBOARD_USERNAME" >> .env
-            echo "TRAEFIK_DASHBOARD_PASSWORD=$ENCRYPTED_TRAEFIK_PASSWORD" >> .env
-            echo "TRAEFIK_RESTART_POLICY=always" >> .env
-
-            docker compose up traefik -d
-            ufw-docker allow workspeace-traefik
+          script: ${{ steps.script.outputs.content }}
   vscode:
     name: VSCode
     runs-on: ubuntu-latest
@@ -213,7 +179,12 @@ jobs:
       - htpasswd
       - traefik
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/vscode.sh
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_VSCODE: ${{ github.event.inputs.vscode }}
           VSCODE_USERNAME: ${{ secrets.VSCODE_USERNAME || 'admin' }}
@@ -224,28 +195,19 @@ jobs:
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_VSCODE,VSCODE_USERNAME,VSCODE_PASSWORD
-          script: |
-            cd $HOME/docker-compose.yml
-
-            if [ $START_VSCODE = 'true' ]
-            then
-              ENCRYPTED_VSCODE_PASSWORD=$(htpasswd -nbs $VSCODE_USERNAME $VSCODE_PASSWORD | cut -d ':' -f 2)
-
-              echo "VSCODE_CONTAINER_NAME=workspeace-vscode" >> .env
-              echo "VSCODE_TRAEFIK_USERNAME=$VSCODE_USERNAME" >> .env
-              echo "VSCODE_TRAEFIK_PASSWORD=\"$ENCRYPTED_VSCODE_PASSWORD\"" >> .env
-              echo "VSCODE_RESTART_POLICY=unless-stopped" >> .env
-              docker compose up vscode -d
-            else
-              docker compose stop vscode
-            fi
+          script: ${{ steps.script.outputs.content }}
   pgadmin:
     name: pgAdmin
     runs-on: ubuntu-latest
     needs:
       - traefik
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/pgadmin.sh
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_PGADMIN: ${{ github.event.inputs.pgadmin }}
           PGADMIN_USERNAME: ${{ secrets.PGADMIN_USERNAME || 'admin@admin.com' }}
@@ -256,26 +218,19 @@ jobs:
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_PGADMIN,PGADMIN_USERNAME,PGADMIN_PASSWORD
-          script: |
-            cd $HOME/docker-compose.yml
-
-            if [ $START_PGADMIN == 'true' ]
-            then
-              echo "PGADMIN_CONTAINER_NAME=workspeace-pgadmin" >> .env
-              echo "PGADMIN_DEFAULT_EMAIL=$PGADMIN_USERNAME" >> .env
-              echo "PGADMIN_DEFAULT_PASSWORD=$PGADMIN_PASSWORD" >> .env
-              echo "PGADMIN_RESTART_POLICY=unless-stopped" >> .env
-              docker compose up pgadmin -d
-            else
-              docker compose stop pgadmin
-            fi
+          script: ${{ steps.script.outputs.content }}
   hoppscotch:
     name: Hoppscotch
     runs-on: ubuntu-latest
     needs:
       - traefik
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/hoppscotch.sh
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_HOPPSCOTCH: ${{ github.event.inputs.hoppscotch }}
         with:
@@ -284,17 +239,7 @@ jobs:
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_HOPPSCOTCH
-          script: |
-            cd $HOME/docker-compose.yml
-
-            if [ $START_HOPPSCOTCH == 'true' ]
-            then
-              echo "HOPPSCOTCH_CONTAINER_NAME=workspeace-hoppscotch" >> .env
-              echo "HOPPSCOTCH_RESTART_POLICY=unless-stopped" >> .env
-              docker compose up hoppscotch -d
-            else
-              docker compose stop hoppscotch
-            fi
+          script: ${{ steps.script.outputs.content }}
   mongodb:
     name: MongoDB
     runs-on: ubuntu-latest
@@ -303,7 +248,12 @@ jobs:
       - docker
       - firewall
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/mongodb.sh
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_MONGODB: ${{ github.event.inputs.mongodb }}
           MONGODB_USER: ${{ secrets.MONGODB_USER || 'root' }}
@@ -314,19 +264,7 @@ jobs:
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_MONGODB,MONGODB_USER,MONGODB_PASSWORD
-          script: |
-            cd $HOME/docker-compose.yml
-
-            if [ $START_MONGODB == 'true' ]
-            then
-              echo "MONGO_CONTAINER_NAME=workspeace-mongodb" >> .env
-              echo "MONGO_INITDB_ROOT_USERNAME=$MONGODB_USER" >> .env
-              echo "MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD" >> .env
-              echo "MONGO_RESTART_POLICY=unless-stopped" >> .env
-              docker compose up mongo -d
-            else
-              docker compose stop mongo
-            fi
+          script: ${{ steps.script.outputs.content }}
   postgresql:
     name: PostgreSQL
     runs-on: ubuntu-latest
@@ -335,7 +273,12 @@ jobs:
       - docker
       - firewall
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/postgresql.sh
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_POSTGRESQL: ${{ github.event.inputs.postgresql }}
           POSTGRESQL_USER: ${{ secrets.POSTGRESQL_USER || 'admin' }}
@@ -346,19 +289,7 @@ jobs:
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_POSTGRESQL,POSTGRESQL_USER,POSTGRESQL_PASSWORD
-          script: |
-            cd $HOME/docker-compose.yml
-
-            if [ $START_POSTGRESQL == 'true' ]
-            then
-              echo "POSTGRESQL_CONTAINER_NAME=workspeace-postgres" >> .env
-              echo "POSTGRESQL_USER=$POSTGRESQL_USER" >> .env
-              echo "POSTGRESQL_PASSWORD=$POSTGRESQL_PASSWORD" >> .env    
-              echo "POSTGRESQL_RESTART_POLICY=unless-stopped" >> .env
-              docker compose up postgres -d
-            else
-              docker compose stop postgres
-            fi
+          script: ${{ steps.script.outputs.content }}
   redis:
     name: Redis
     runs-on: ubuntu-latest
@@ -367,7 +298,12 @@ jobs:
       - docker
       - firewall
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/redis.sh
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_REDIS: ${{ github.event.inputs.redis }}
         with:
@@ -376,24 +312,19 @@ jobs:
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_REDIS
-          script: |
-            cd $HOME/docker-compose.yml
-
-            if [ $START_REDIS == 'true' ]
-            then
-              echo "REDIS_CONTAINER_NAME=workspeace-redis" >> .env
-              echo "REDIS_RESTART_POLICY=unless-stopped" >> .env
-              docker compose up redis -d
-            else
-              docker compose stop redis
-            fi
+          script: ${{ steps.script.outputs.content }}
   redisinsight:
     name: RedisInsight
     runs-on: ubuntu-latest
     needs:
       - traefik
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/redisinsight.sh
+      - uses: appleboy/ssh-action@v0.1.10
         env:
           START_REDISINSIGHT: ${{ github.event.inputs.redisinsight }}
         with:
@@ -402,18 +333,7 @@ jobs:
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           envs: START_REDISINSIGHT,SERVER_SSH_HOST
-          script: |
-            cd $HOME/docker-compose.yml
-
-            if [ $START_REDISINSIGHT == 'true' ]
-            then
-              echo "REDISINSIGHT_CONTAINER_NAME=workspeace-redisinsight" >> .env
-              echo "REDISINSIGHT_RITRUSTEDORIGINS=https://redisinsight.$SERVER_SSH_HOST" >> .env
-              echo "REDISINSIGHT_RESTART_POLICY=unless-stopped" >> .env
-              docker compose up redisinsight -d
-            else
-              docker compose stop redisinsight
-            fi
+          script: ${{ steps.script.outputs.content }}
   cleaning:
     name: Cleaning
     runs-on: ubuntu-latest
@@ -426,11 +346,15 @@ jobs:
       - redisinsight
       - hoppscotch
     steps:
-      - uses: appleboy/ssh-action@v0.1.7
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/cleaning.sh
+      - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            docker image prune --all --force
+          script: ${{ steps.script.outputs.content }}
