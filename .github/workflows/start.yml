@@ -348,11 +348,15 @@ jobs:
       - redisinsight
       - hoppscotch
     steps:
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/cleaning.sh
       - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            docker image prune --all --force
+          script: ${{ steps.script.outputs.content }}
