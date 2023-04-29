@@ -118,23 +118,18 @@ jobs:
     needs:
       - git
     steps:
+      - uses: actions/checkout@v3
+      - uses: juliangruber/read-file-action@v1
+        id: script
+        with:
+          path: ./scripts/start/compose.sh
       - uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          script: |
-            DOCKER_COMPOSE_FOLDER=$HOME/docker-compose.yml
-            if [ ! -d $DOCKER_COMPOSE_FOLDER ]
-            then
-              git clone https://github.com/gabrielrufino/docker-compose.yml.git $DOCKER_COMPOSE_FOLDER
-              cd $DOCKER_COMPOSE_FOLDER
-            else
-              cd $DOCKER_COMPOSE_FOLDER
-              git pull
-            fi
-            printf "# Environment variables\n\n" > .env
+          script: ${{ steps.script.outputs.content }}
   firewall:
     name: Firewall
     runs-on: ubuntu-latest
