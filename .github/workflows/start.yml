@@ -371,6 +371,7 @@ jobs:
       - redis
       - redisinsight
       - hoppscotch
+      - rabbitmq
     steps:
       - uses: actions/checkout@v3
       - uses: juliangruber/read-file-action@v1
