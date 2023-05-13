@@ -8,10 +8,10 @@ Cloud environment for coding
 
 | **Name**       | **Type** | **Value**              | **How to access**              |
 | -------------- | -------- | ---------------------- | ------------------------------ |
-| @              | A        | 127.0.0.1              | workspeace.example.com         |
-| pgadmin        | CNAME    | workspeace.example.com | pgadmin.workspeace.example.com |
-| vscode         | CNAME    | workspeace.example.com | vscode.workspeace.example.com  |
-| redisinsight   | CNAME    | workspeace.example.com | vscode.workspeace.example.com  |
+| @              | A        | 127.0.0.1              | workinpace.example.com         |
+| pgadmin        | CNAME    | workinpace.example.com | pgadmin.workinpace.example.com |
+| vscode         | CNAME    | workinpace.example.com | vscode.workinpace.example.com  |
+| redisinsight   | CNAME    | workinpace.example.com | vscode.workinpace.example.com  |
 
 ## Environment variables
 
