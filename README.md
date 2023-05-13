@@ -1,4 +1,6 @@
-![Logo](https://drive.google.com/uc?export=view&id=1PSeuIeyTP6zrdeZXZsYvaYLbp6AokB_W)
+<p align="center">
+  <img width="80%" src="https://drive.google.com/uc?export=view&id=1PSeuIeyTP6zrdeZXZsYvaYLbp6AokB_W">
+</p>
 
 Cloud environment for coding
 
