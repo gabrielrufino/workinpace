@@ -43,24 +43,6 @@ jobs:
     steps:
       - if: ${{ env.SERVER_SSH_HOST == '' || env.SERVER_SSH_USER == '' || env.SERVER_SSH_PASSWORD == '' || env.SERVER_SSH_PORT == '' || env.DOMAIN == '' || env.ACME_EMAIL == '' }}
         run: exit 1
-  htpasswd:
-    name: htpasswd
-    runs-on: ubuntu-latest
-    needs:
-      - validation
-    steps:
-      - uses: actions/checkout@v3
-      - uses: juliangruber/read-file-action@v1
-        id: script
-        with:
-          path: ./scripts/start/htpasswd.sh
-      - uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ env.SERVER_SSH_HOST }}
-          username: ${{ env.SERVER_SSH_USER }}
-          password: ${{ env.SERVER_SSH_PASSWORD }}
-          port: ${{ env.SERVER_SSH_PORT }}
-          script: ${{ steps.script.outputs.content }}
   docker:
     name: Docker
     runs-on: ubuntu-latest
@@ -179,7 +161,6 @@ jobs:
     name: VSCode
     runs-on: ubuntu-latest
     needs:
-      - htpasswd
       - traefik
     steps:
       - uses: actions/checkout@v3
@@ -190,14 +171,13 @@ jobs:
       - uses: appleboy/ssh-action@v0.1.10
         env:
           START_VSCODE: ${{ github.event.inputs.vscode }}
-          VSCODE_USERNAME: ${{ secrets.VSCODE_USERNAME || 'admin' }}
-          VSCODE_PASSWORD: ${{ secrets.VSCODE_PASSWORD || 'admin' }}
+          VSCODE_TOKEN: ${{ secrets.VSCODE_TOKEN || 'admin' }}
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          envs: START_VSCODE,VSCODE_USERNAME,VSCODE_PASSWORD
+          envs: START_VSCODE,VSCODE_TOKEN
           script: ${{ steps.script.outputs.content }}
   rabbitmq:
     name: RabbitMQ
