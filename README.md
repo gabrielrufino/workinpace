@@ -23,8 +23,7 @@ Cloud environment for coding
 | SERVER_SSH_PASSWORD | true          |                   |
 | DOMAIN              | true          |                   |
 | ACME_EMAIL          | true          |                   |
-| VSCODE_USERNAME     | false         | admin             |
-| VSCODE_PASSWORD     | false         | admin             |
+| VSCODE_TOKEN        | false         | admin             |
 | PGADMIN_EMAIL       | false         | admin@admin.com   |
 | PGADMIN_PASSWORD    | false         | admin             |
 | RABBITMQ_USERNAME   | false         | admin             |
