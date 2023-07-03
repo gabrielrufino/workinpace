@@ -55,6 +55,8 @@ jobs:
             script: ./scripts/start/docker.sh
           - name: Git
             script: ./scripts/start/git.sh
+          - name: UFW
+            script: ./scripts/start/ufw.sh
     steps:
       - uses: actions/checkout@v3
       - uses: juliangruber/read-file-action@v1
@@ -68,65 +70,11 @@ jobs:
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
           script: ${{ steps.script.outputs.content }}
-  docker:
-    name: Docker
-    runs-on: ubuntu-latest
-    needs:
-      - validation
-    steps:
-      - uses: actions/checkout@v3
-      - uses: juliangruber/read-file-action@v1
-        id: script
-        with:
-          path: ./scripts/start/docker.sh
-      - uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ env.SERVER_SSH_HOST }}
-          username: ${{ env.SERVER_SSH_USER }}
-          password: ${{ env.SERVER_SSH_PASSWORD }}
-          port: ${{ env.SERVER_SSH_PORT }}
-          script: ${{ steps.script.outputs.content }}
-  git:
-    name: Git
-    runs-on: ubuntu-latest
-    needs:
-      - validation
-    steps:
-      - uses: actions/checkout@v3
-      - uses: juliangruber/read-file-action@v1
-        id: script
-        with:
-          path: ./scripts/start/git.sh
-      - uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ env.SERVER_SSH_HOST }}
-          username: ${{ env.SERVER_SSH_USER }}
-          password: ${{ env.SERVER_SSH_PASSWORD }}
-          port: ${{ env.SERVER_SSH_PORT }}
-          script: ${{ steps.script.outputs.content }}
-  ufw:
-    name: UFW
-    runs-on: ubuntu-latest
-    needs:
-      - validation
-    steps:
-      - uses: actions/checkout@v3
-      - uses: juliangruber/read-file-action@v1
-        id: script
-        with:
-          path: ./scripts/start/ufw.sh
-      - uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ env.SERVER_SSH_HOST }}
-          username: ${{ env.SERVER_SSH_USER }}
-          password: ${{ env.SERVER_SSH_PASSWORD }}
-          port: ${{ env.SERVER_SSH_PORT }}
-          script: ${{ steps.script.outputs.content }}
   compose:
     name: Compose file
     runs-on: ubuntu-latest
     needs:
-      - git
+      - dependencies
     steps:
       - uses: actions/checkout@v3
       - uses: juliangruber/read-file-action@v1
@@ -144,7 +92,7 @@ jobs:
     name: Firewall
     runs-on: ubuntu-latest
     needs:
-      - ufw
+      - dependencies
     steps:
       - uses: actions/checkout@v3
       - uses: juliangruber/read-file-action@v1
@@ -162,7 +110,7 @@ jobs:
     name: Traefik
     runs-on: ubuntu-latest
     needs:
-      - docker
+      - dependencies
       - compose
       - firewall
     steps:
@@ -276,7 +224,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - compose
-      - docker
+      - dependencies
       - firewall
     steps:
       - uses: actions/checkout@v3
@@ -301,7 +249,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - compose
-      - docker
+      - dependencies
       - firewall
     steps:
       - uses: actions/checkout@v3
@@ -326,7 +274,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - compose
-      - docker
+      - dependencies
       - firewall
     steps:
       - uses: actions/checkout@v3
