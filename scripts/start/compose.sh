@@ -5,6 +5,8 @@ then
   cd $DOCKER_COMPOSE_FOLDER
 else
   cd $DOCKER_COMPOSE_FOLDER
+  git checkout main
   git pull
 fi
+git checkout $(git tag -l 'v3*' | sort -V | tail -n1)
 printf "# Environment variables\n\n" > .env
