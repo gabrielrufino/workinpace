@@ -63,7 +63,7 @@ jobs:
         id: script
         with:
           path: ${{ matrix.dependency.script }}
-      - uses: appleboy/ssh-action@v0.1.10
+      - uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
@@ -81,7 +81,7 @@ jobs:
         id: script
         with:
           path: ./scripts/start/compose.sh
-      - uses: appleboy/ssh-action@v0.1.10
+      - uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
@@ -99,7 +99,7 @@ jobs:
         id: script
         with:
           path: ./scripts/start/firewall.sh
-      - uses: appleboy/ssh-action@v0.1.10
+      - uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
@@ -118,7 +118,7 @@ jobs:
         id: script
         with:
           path: ./scripts/start/traefik.sh
-      - uses: appleboy/ssh-action@v0.1.10
+      - uses: appleboy/ssh-action@v1.0.0
         env:
           TRAEFIK_DASHBOARD_USERNAME: ${{ secrets.TRAEFIK_DASHBOARD_USERNAME || 'admin' }}
           TRAEFIK_DASHBOARD_PASSWORD: ${{ secrets.TRAEFIK_DASHBOARD_PASSWORD || 'admin' }}
@@ -140,7 +140,7 @@ jobs:
         id: script
         with:
           path: ./scripts/start/vscode.sh
-      - uses: appleboy/ssh-action@v0.1.10
+      - uses: appleboy/ssh-action@v1.0.0
         env:
           START_VSCODE: ${{ github.event.inputs.vscode }}
           VSCODE_TOKEN: ${{ secrets.VSCODE_TOKEN || 'admin' }}
@@ -162,7 +162,7 @@ jobs:
         id: script
         with:
           path: ./scripts/start/rabbitmq.sh
-      - uses: appleboy/ssh-action@v0.1.10
+      - uses: appleboy/ssh-action@v1.0.0
         env:
           START_RABBITMQ: ${{ github.event.inputs.rabbitmq }}
           RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME || 'admin' }}
@@ -185,7 +185,7 @@ jobs:
         id: script
         with:
           path: ./scripts/start/pgadmin.sh
-      - uses: appleboy/ssh-action@v0.1.10
+      - uses: appleboy/ssh-action@v1.0.0
         env:
           START_PGADMIN: ${{ github.event.inputs.pgadmin }}
           PGADMIN_USERNAME: ${{ secrets.PGADMIN_USERNAME || 'admin@admin.com' }}
@@ -208,7 +208,7 @@ jobs:
         id: script
         with:
           path: ./scripts/start/hoppscotch.sh
-      - uses: appleboy/ssh-action@v0.1.10
+      - uses: appleboy/ssh-action@v1.0.0
         env:
           START_HOPPSCOTCH: ${{ github.event.inputs.hoppscotch }}
         with:
@@ -230,7 +230,7 @@ jobs:
         id: script
         with:
           path: ./scripts/start/mongodb.sh
-      - uses: appleboy/ssh-action@v0.1.10
+      - uses: appleboy/ssh-action@v1.0.0
         env:
           START_MONGODB: ${{ github.event.inputs.mongodb }}
           MONGODB_USER: ${{ secrets.MONGODB_USER || 'root' }}
@@ -254,7 +254,7 @@ jobs:
         id: script
         with:
           path: ./scripts/start/postgresql.sh
-      - uses: appleboy/ssh-action@v0.1.10
+      - uses: appleboy/ssh-action@v1.0.0
         env:
           START_POSTGRESQL: ${{ github.event.inputs.postgresql }}
           POSTGRESQL_USER: ${{ secrets.POSTGRESQL_USER || 'admin' }}
@@ -278,7 +278,7 @@ jobs:
         id: script
         with:
           path: ./scripts/start/redis.sh
-      - uses: appleboy/ssh-action@v0.1.10
+      - uses: appleboy/ssh-action@v1.0.0
         env:
           START_REDIS: ${{ github.event.inputs.redis }}
         with:
@@ -299,7 +299,7 @@ jobs:
         id: script
         with:
           path: ./scripts/start/redisinsight.sh
-      - uses: appleboy/ssh-action@v0.1.10
+      - uses: appleboy/ssh-action@v1.0.0
         env:
           START_REDISINSIGHT: ${{ github.event.inputs.redisinsight }}
         with:
@@ -327,7 +327,7 @@ jobs:
         id: script
         with:
           path: ./scripts/start/cleaning.sh
-      - uses: appleboy/ssh-action@v0.1.10
+      - uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
