@@ -28,3 +28,4 @@ Cloud environment for coding
 | PGADMIN_PASSWORD    | false         | admin             |
 | RABBITMQ_USERNAME   | false         | admin             |
 | RABBITMQ_PASSWORD   | false         | admin             |
+| REDIS_PASSWORD      | false         | admin             |

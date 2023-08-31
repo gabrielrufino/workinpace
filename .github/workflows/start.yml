@@ -281,12 +281,13 @@ jobs:
       - uses: appleboy/ssh-action@v1.0.0
         env:
           START_REDIS: ${{ github.event.inputs.redis }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD || 'admin' }}
         with:
           host: ${{ env.SERVER_SSH_HOST }}
           username: ${{ env.SERVER_SSH_USER }}
           password: ${{ env.SERVER_SSH_PASSWORD }}
           port: ${{ env.SERVER_SSH_PORT }}
-          envs: START_REDIS
+          envs: START_REDIS,REDIS_PASSWORD
           script: ${{ steps.script.outputs.content }}
   redisinsight:
     name: RedisInsight
