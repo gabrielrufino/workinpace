@@ -1,0 +1,7 @@
+# Contributing
+
+## Running tests
+
+```bash
+bash tests/main.sh
+```
