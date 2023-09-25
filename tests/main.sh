@@ -25,6 +25,7 @@ SERVER_SSH_HOST=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddr
 
 # Running tests
 ./bin/act workflow_dispatch \
+  --platform catthehacker/ubuntu:act-latest \
   --secret SERVER_SSH_HOST=$SERVER_SSH_HOST \
   --secret SERVER_SSH_PORT=22 \
   --secret SERVER_SSH_USER=admin \
