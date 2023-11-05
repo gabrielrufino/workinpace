@@ -6,8 +6,16 @@ on:
   workflow_dispatch:
 
 jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ vars.DISABLE_UPDATE == 'true' }}
+        run: exit 0
   server:
     name: Server
+    needs:
+      - checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +32,8 @@ jobs:
           script: ${{ steps.script.outputs.content }}
   vscode:
     name: VSCode
+    needs:
+      - checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
