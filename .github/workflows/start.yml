@@ -58,7 +58,7 @@ jobs:
           - name: UFW
             script: ./scripts/start/ufw.sh
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
@@ -76,7 +76,7 @@ jobs:
     needs:
       - dependencies
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
@@ -94,7 +94,7 @@ jobs:
     needs:
       - dependencies
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
@@ -113,7 +113,7 @@ jobs:
       - compose
       - firewall
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
@@ -135,7 +135,7 @@ jobs:
     needs:
       - traefik
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
@@ -157,7 +157,7 @@ jobs:
     needs:
       - traefik
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
@@ -180,7 +180,7 @@ jobs:
     needs:
       - traefik
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
@@ -203,7 +203,7 @@ jobs:
     needs:
       - traefik
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
@@ -225,7 +225,7 @@ jobs:
       - compose
       - firewall
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
@@ -249,7 +249,7 @@ jobs:
       - compose
       - firewall
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
@@ -273,7 +273,7 @@ jobs:
       - compose
       - firewall
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
@@ -295,7 +295,7 @@ jobs:
     needs:
       - traefik
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
@@ -323,7 +323,7 @@ jobs:
       - hoppscotch
       - rabbitmq
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:

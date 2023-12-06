@@ -6,11 +6,19 @@ on:
   workflow_dispatch:
 
 jobs:
-  server:
-    name: Server
+  checks:
+    name: Checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - if: ${{ vars.DISABLE_UPDATE == 'true' }}
+        run: exit 0
+  server:
+    name: Server
+    needs:
+      - checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
@@ -24,9 +32,11 @@ jobs:
           script: ${{ steps.script.outputs.content }}
   vscode:
     name: VSCode
+    needs:
+      - checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: juliangruber/read-file-action@v1
         id: script
         with:
